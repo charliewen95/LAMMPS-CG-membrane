@@ -1,0 +1,227 @@
+##########################################################################################
+## Restarting Simulation
+###########################################################################################
+
+read_restart ./restart_files/create_rst.200000.restart
+
+##########################################################################################
+# Basic types and groups
+##########################################################################################
+
+variable lip_H  equal  1  # \
+variable lip_I  equal  2  #  } Lipid head, interface, tail
+variable lip_T  equal  3  # /
+
+group lip_group  type  ${lip_H} ${lip_I} ${lip_T}
+
+##########################################################################################
+# Simulation output
+##########################################################################################
+
+thermo        5000
+thermo_style  custom  step spcpu  temp  ke pe etotal  lx ly lz  pxx pyy pzz
+
+dump            lip_traj  lip_group  custom  ${TRAJ_EVERY} ${OUTPUT_PREFIX}.lip.lammpstrj id type mol x y z
+dump_modify     lip_traj  sort id
+
+restart 250000 ./restart_files/${OUTPUT_PREFIX}.*.restart
+
+##########################################################################################
+# 4-site lipid model
+##########################################################################################
+
+
+variable Boltzmann    equal  1.3806e-23
+variable Avogadro     equal  6.0221e+23
+
+variable Temperature  equal  300.0
+variable kBT          equal  $( (v_Boltzmann * v_Temperature * v_Avogadro) / (4.184 * 1000.0) ) # in kcal/mol
+
+variable R    equal $( v_BEAD_SIZE )
+variable RC   equal $( 2.00 * v_R )
+variable A    equal $( (1.0/v_R   ) * (50.0*7.5)                  * v_kBT )
+variable B    equal $( (1.0/v_R   ) * (v_STICKYNESS/v_TAIL_BEADS) * v_kBT )
+
+variable R_HH equal $( v_R  * 1.0  )
+variable A_H  equal $( (1.0/v_R_HH) * (20.0*7.5)                  * v_kBT )
+
+### A repel
+### B attract
+variable A_HH   equal $( v_A_H* 1.5 )
+
+variable RA_II  equal $( v_R  * 0.84 ) #BEAD size of I
+variable RB_II  equal $( v_RC * 1.1  ) #cut off of I
+variable A_II   equal $( v_A  * 1.0  ) #y intercept
+variable B_II   equal $( v_B  * 1.0  ) #depth of well
+
+variable RA_TT  equal $( v_R  * 1.0  )
+variable RB_TT  equal $( v_RC * 1.0  )
+variable A_TT   equal $( v_A  * 1.0  )
+variable B_TT   equal $( v_B  * 1.0  )
+
+variable BOND_R equal $( v_R )
+variable BOND_LIP equal $( 25.0 * v_kBT )
+variable BOND_K equal $( 2.0 * v_kBT )
+variable BEND_K equal $( v_BEND * v_kBT )
+
+print ""
+print "#"
+print "# kBT (kcal/mol)  = ${kBT}"
+print "#"
+print "# BEAD_SIZE (Angstrom) = $(v_BEAD_SIZE)"
+print "# STICKYNESS (kBT)     = $(v_STICKYNESS)"
+print "# TAIL_BEADS           = $(v_TAIL_BEADS)"
+print "#"
+print "# R  (Ang.)     = $(v_R)"
+print "# RC (Ang.)     = $(v_RC)"
+print "# A (kBT)       = $(v_A/v_kBT)"
+print "# B (kBT)       = $(v_B/v_kBT)"
+print "#"
+print "# BOND_R (Ang.) = $(v_BOND_R)"
+print "# BOND_K (kBT)  = $(v_BOND_K/v_kBT)"
+print "# BEND_K (kBT)  = $(v_BEND_K/v_kBT)"
+print "#"
+print ""
+
+##########################################################################################
+# Force field - nonbonded
+##########################################################################################
+
+pair_style  grime
+
+# Default: pure repulsion
+pair_coeff  *        *         ${A}  ${R}  0.0  ${R}
+
+# Head-head : no interaction
+
+pair_coeff  ${lip_H} ${lip_H}  ${A_HH}  ${R_HH}  0.0  ${R_HH}
+
+# Interface-interface, tail-tail : same, for simplicity.
+# Interface-tail can be enabled, but no need.
+
+pair_coeff  ${lip_I} ${lip_I}  ${A_II}  ${RA_II}  ${B_II}  ${RB_II}
+pair_coeff  ${lip_T} ${lip_T}  ${A_TT}  ${RA_TT}  ${B_TT}  ${RB_TT}
+
+##########################################################################################
+# Force field - bonds
+##########################################################################################
+
+bond_style harmonic
+
+bond_coeff 1 ${BOND_LIP} ${BOND_R}
+
+bond_coeff   2  ${BOND_K}  4.0
+bond_coeff   3  ${BOND_K}  4.25
+bond_coeff   4  ${BOND_K}  4.5
+bond_coeff   5  ${BOND_K}  4.75
+bond_coeff   6  ${BOND_K}  5.0
+bond_coeff   7  ${BOND_K}  5.25
+bond_coeff   8  ${BOND_K}  5.5
+bond_coeff   9  ${BOND_K}  5.75
+bond_coeff   10 ${BOND_K}  6.0
+bond_coeff   11 ${BOND_K}  6.25
+bond_coeff   12 ${BOND_K}  6.5
+bond_coeff   13 ${BOND_K}  6.75
+bond_coeff   14 ${BOND_K}  7.0
+bond_coeff   15 ${BOND_K}  7.25
+bond_coeff   16 ${BOND_K}  7.5
+bond_coeff   17 ${BOND_K}  7.75
+bond_coeff   18 ${BOND_K}  8.0
+bond_coeff   19 ${BOND_K}  8.25
+bond_coeff   20 ${BOND_K}  8.5
+bond_coeff   21 ${BOND_K}  8.75
+bond_coeff   22 ${BOND_K}  9.0
+bond_coeff   23 ${BOND_K}  9.25
+bond_coeff   24 ${BOND_K}  9.5
+bond_coeff   25 ${BOND_K}  9.75
+bond_coeff   26 ${BOND_K}  10.0
+bond_coeff   27 ${BOND_K}  10.25
+bond_coeff   28 ${BOND_K}  10.5
+bond_coeff   29 ${BOND_K}  10.75
+bond_coeff   30 ${BOND_K}  11.0
+bond_coeff   31 ${BOND_K}  11.25
+bond_coeff   32 ${BOND_K}  11.5
+bond_coeff   33 ${BOND_K}  11.75
+bond_coeff   34 ${BOND_K}  12.0
+bond_coeff   35 ${BOND_K}  12.25
+bond_coeff   36 ${BOND_K}  12.5
+bond_coeff   37 ${BOND_K}  12.75
+bond_coeff   38 ${BOND_K}  13.0
+bond_coeff   39 ${BOND_K}  13.25
+bond_coeff   40 ${BOND_K}  13.5
+bond_coeff   41 ${BOND_K}  13.75
+bond_coeff   42 ${BOND_K}  14.0
+bond_coeff   43 ${BOND_K}  14.25
+bond_coeff   44 ${BOND_K}  14.5
+bond_coeff   45 ${BOND_K}  14.75
+bond_coeff   46 ${BOND_K}  15.0
+bond_coeff   47 ${BOND_K}  15.25
+bond_coeff   48 ${BOND_K}  15.5 
+bond_coeff   49 ${BOND_K}  15.75
+bond_coeff   50 ${BOND_K}  16.0 
+bond_coeff   51 ${BOND_K}  16.25
+
+##########################################################################################
+# Force field - angles
+##########################################################################################
+
+angle_style harmonic
+
+if "${TAIL_BEADS} > 1" then "angle_coeff 1 ${BEND_K} 180.0"
+
+##########################################################################################
+# Force field debug output, if needed
+##########################################################################################
+
+#pair_write  ${lip_H} ${lip_H}  100  r  0.00001 ${RC}  lip_HH.table  HH
+#pair_write  ${lip_H} ${lip_I}  100  r  0.00001 ${RC}  lip_HT.table  HI
+#pair_write  ${lip_H} ${lip_T}  100  r  0.00001 ${RC}  lip_HT.table  HT
+#pair_write  ${lip_I} ${lip_I}  100  r  0.00001 ${RC}  lip_II.table  II
+#pair_write  ${lip_I} ${lip_T}  100  r  0.00001 ${RC}  lip_IT.table  IT
+#pair_write  ${lip_T} ${lip_T}  100  r  0.00001 ${RC}  lip_TT.table  TT
+
+##########################################################################################
+# Integration parameters
+##########################################################################################
+
+timestep      ${DELTA_T}
+neighbor      ${R} bin
+neigh_modify  every 5 delay 20 check yes
+
+comm_style tiled
+fix rcb_balance  all  balance 10000  1.1  rcb
+
+#fix npt_fix  lip_group  npt temp ${Temperature} ${Temperature} ${T_DAMP}  x ${P_EXT} ${P_EXT} ${P_DAMP}  y ${P_EXT} ${P_EXT} ${P_DAMP}  couple xy
+
+fix nvt_fix lip_group nvt temp  ${Temperature} ${Temperature} ${T_DAMP}
+
+##########################################################################################
+# Run simulation, saving anything we need
+##########################################################################################
+
+velocity all zero linear
+velocity all zero angular
+velocity all create 300.0 4928459 rot yes dist gaussian
+
+minimize 1.0e-4 1.0e-6 100 5000
+
+##########
+####### Standard Example of deform
+##### 5000 steps -1 A +1 A on both x and y # +4 A^2 per 5000 steps
+#fix deform_all all deform 1 x delta -1 1 y delta -1 1
+#run 5000
+#####
+fix deform_all all deform 1 x delta -10 10 y delta -10 10
+run 50000
+unfix deform_all
+velocity all zero linear
+velocity all zero angular
+velocity all create 300.0 4928459 rot yes dist gaussian
+minimize 1.0e-4 1.0e-6 100 5000
+##########
+
+run 500000
+
+run ${N_STEPS}
+write_data ${OUTPUT_PREFIX}.final.data nocoeff
+
