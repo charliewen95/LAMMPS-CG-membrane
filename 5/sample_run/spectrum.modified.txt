@@ -1,0 +1,45 @@
+#
+# Parameters:
+#
+#  Input: /data/charlie/LAMMPS/post_defense_final/BEND_1.25_kc/BEND_1.25/data.production1.lip.lammpstrj
+#  Output prefix: spectrum
+#  max_k, max_l : 10, 10
+#  head types : 1 
+#  tail types : 3 
+#  gx, gy : 20, 20
+#  delta_q : 0.05
+#  scale : 0.1
+#  which_monolayer : both
+#  histogram width : -1
+#  save_midplane   : -1
+#  start, stop frames : 0, 10000
+#  save_raw : -1
+#  Serial version
+#
+# Output:
+#
+#  q = projected wavelength: sqrt( qx^2 + qy^2 )
+#  S_q  = modified structure factor for projected wavelength q: S_q = < A |u(q)|^2 >
+#
+# Fitting a bending modulus, kC:
+#
+# S_q = 1.0/( kC.q^4 ) for small q in the tension-free limit.
+#
+#            q           S_q             N   StdDev(S_q)  StdErr(S_q)
+#
+  7.500000e-02  4.289181e+03          2406  7.921599e+03  1.614972e+02
+  1.250000e-01  1.183446e+02          4002  1.790567e+02  2.830427e+00
+  1.750000e-01  2.336378e+01          4814  2.556985e+01  3.685320e-01
+  2.250000e-01  7.741913e+00          5616  8.089370e+00  1.079447e-01
+  2.750000e-01  3.271491e+00          7210  3.335849e+00  3.928608e-02
+  3.250000e-01  1.619880e+00          8024  1.703643e+00  1.901881e-02
+  3.750000e-01  8.934350e-01         10388  9.132948e-01  8.960763e-03
+  4.250000e-01  5.496474e-01         11402  5.724335e-01  5.360861e-03
+  4.750000e-01  3.832081e-01         11836  3.922771e-01  3.605708e-03
+  5.250000e-01  2.912517e-01         12033  2.959026e-01  2.697503e-03
+  5.750000e-01  2.434565e-01          8833  2.472553e-01  2.630822e-03
+  6.250000e-01  2.148035e-01          4835  2.218932e-01  3.191140e-03
+  6.750000e-01  2.010427e-01          2428  2.238340e-01  4.542571e-03
+  7.250000e-01  1.883492e-01          2401  2.002682e-01  4.087106e-03
+  7.750000e-01  3.102166e-01            10  3.845076e-01  1.215920e-01
+  8.250000e-01  3.284472e-02             2  3.518242e-02  2.487773e-02
